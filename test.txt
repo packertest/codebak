@@ -1,0 +1,62 @@
+size_t g_offset_buff[64] = { 0 };
+
+void GetOffsetValue(string shellcode) {
+	int count = 0;
+	int index = 0;
+	for (size_t i = 0; i < shellcode.size(); i++)
+	{
+		if (shellcode.c_str()[i] == 0x41 && shellcode.c_str()[i + 1] == 0x41 &&
+			shellcode.c_str()[i + 2] == 0x41 && shellcode.c_str()[i + 3] == 0x41) {
+			index += 4;
+			g_offset_buff[count] = i;
+			count++;
+		}
+	}
+}
+
+void ReplaceValue(char* str1, char* str2, int offset, int index) {
+	str1[offset] = str2[index];
+	str1[offset + 1] = str2[index + 1];
+	str1[offset + 2] = str2[index + 2];
+	str1[offset + 3] = str2[index + 3];
+}
+
+
+void main() {
+  int index = 0;
+	int begin = 0;
+	int count = 0;
+	
+	for (size_t i = 0; i < shellcode.size(); i++)
+	{
+		if (shellcode.c_str()[i]	== 0x41 && shellcode.c_str()[i+1] == 0x41 &&
+			shellcode.c_str()[i+2]  == 0x41 && shellcode.c_str()[i+3] == 0x41) {
+			switch (count)
+			{
+			case 10:
+				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[60], index);
+				break;
+			case 20:
+				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[50], index);
+				break;
+			case 30:
+				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[40], index);
+				break;
+			case 40:
+				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[30], index);
+				break;
+			case 50:
+				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[20], index);
+				break;
+			case 60:
+				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[10], index);
+				break;
+			default:
+				ReplaceValue(cpy_buff_two, cpy_buff, i, index);
+				break;
+			}
+			index += 4;
+			count++;
+		}
+	}
+}
