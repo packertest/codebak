@@ -1,62 +1,78 @@
-size_t g_offset_buff[64] = { 0 };
+#include <Windows.h>
+#include <iostream>
+#include <stdio.h>
+#include <string>
 
-void GetOffsetValue(string shellcode) {
-	int count = 0;
-	int index = 0;
-	for (size_t i = 0; i < shellcode.size(); i++)
+
+std::string GetFileContent(const char* p_filename)
+{
+	FILE* fp = NULL;
+	fopen_s(&fp, p_filename, "rb");
+	if (fp != NULL)
 	{
-		if (shellcode.c_str()[i] == 0x41 && shellcode.c_str()[i + 1] == 0x41 &&
-			shellcode.c_str()[i + 2] == 0x41 && shellcode.c_str()[i + 3] == 0x41) {
-			index += 4;
-			g_offset_buff[count] = i;
-			count++;
+		fseek(fp, 0, SEEK_END);
+		long length = ftell(fp);
+		char* buff = (char*)malloc(length + 1);
+		if (buff != NULL) {
+			memset(buff, sizeof(buff), 0);
+			rewind(fp);
+			size_t read_len = fread(buff, 1, length, fp);
+			buff[read_len] = '\0';
+			fclose(fp);
+			std::string file_data(buff, read_len);
+			free(buff);
+			return file_data;
 		}
+	}
+	return std::string();
+}
+
+void SaveFile(const char* p_filename, const char* p_buff, DWORD dw_len) {
+	FILE* fp = NULL;
+	fopen_s(&fp, p_filename, "wb+");
+	if (fp != NULL)
+	{
+		fwrite(p_buff, 1, dw_len, fp);
+		fclose(fp);
 	}
 }
 
-void ReplaceValue(char* str1, char* str2, int offset, int index) {
-	str1[offset] = str2[index];
-	str1[offset + 1] = str2[index + 1];
-	str1[offset + 2] = str2[index + 2];
-	str1[offset + 3] = str2[index + 3];
+bool GetPECodeSegInfo(const char* pFilePath, const char* p_filename)
+{
+	std::string strContent = GetFileContent(pFilePath);
+	if (0 == strContent.length()) {
+		return false;
+	}
+
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)strContent.c_str();
+	if (pDosHeader && pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
+		return false;
+	}
+
+	PIMAGE_NT_HEADERS pNtHeaders = (PIMAGE_NT_HEADERS)((BYTE*)pDosHeader + pDosHeader->e_lfanew);
+	if (pNtHeaders && pNtHeaders->Signature != IMAGE_NT_SIGNATURE){
+		return false;
+	}
+
+	PIMAGE_SECTION_HEADER pSecHeader = IMAGE_FIRST_SECTION(pNtHeaders);
+	const int nSectionCnts = pNtHeaders->FileHeader.NumberOfSections;
+	for (int i = 0; i < nSectionCnts; i++)
+	{
+		if (0 == strcmp((char*)pSecHeader->Name, ".text"))
+		{
+			const char* pCodeEntry = (const char*)((BYTE*)pDosHeader + pSecHeader->PointerToRawData);
+			SaveFile(p_filename, pCodeEntry, pSecHeader->Misc.VirtualSize);
+			return true;
+		}
+		pSecHeader++;
+	}
+
+	return false;
 }
 
 
-void main() {
-  int index = 0;
-	int begin = 0;
-	int count = 0;
+int main(int argc, char* argv[]) {
 	
-	for (size_t i = 0; i < shellcode.size(); i++)
-	{
-		if (shellcode.c_str()[i]	== 0x41 && shellcode.c_str()[i+1] == 0x41 &&
-			shellcode.c_str()[i+2]  == 0x41 && shellcode.c_str()[i+3] == 0x41) {
-			switch (count)
-			{
-			case 10:
-				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[60], index);
-				break;
-			case 20:
-				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[50], index);
-				break;
-			case 30:
-				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[40], index);
-				break;
-			case 40:
-				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[30], index);
-				break;
-			case 50:
-				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[20], index);
-				break;
-			case 60:
-				ReplaceValue(cpy_buff_two, cpy_buff, g_offset_buff[10], index);
-				break;
-			default:
-				ReplaceValue(cpy_buff_two, cpy_buff, i, index);
-				break;
-			}
-			index += 4;
-			count++;
-		}
-	}
+	GetPECodeSegInfo(argv[1], argv[2]);
+	return 0;
 }
