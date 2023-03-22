@@ -1,78 +1,28 @@
-#include <Windows.h>
-#include <iostream>
-#include <stdio.h>
-#include <string>
+    // get hardlink num
+    FILE_LINKS_INFORMATION* fli = (FILE_LINKS_INFORMATION*)p_buff;
+    ULONG BytesNeeded = fli->BytesNeeded;
+    ULONG EntriesReturned = fli->EntriesReturned;
+    ULONG offset = fli->Entry.NextEntryOffset;
+    
+    BYTE offset_buff[8] = { 0 };
+    ULONG index = 0;
+    for (size_t i = 0; i < EntriesReturned; i++)
+    {
+        LPVOID p_filelink_information = malloc(offset);
+        if (p_filelink_information == NULL) {
+            fnNtClose(filehandle);
+            return -1;
+        }
+        memset(p_filelink_information, 0, offset);
+        memcpy_s(p_filelink_information, offset, (char*)p_buff + 8 + index, offset);
 
+        FILE_LINK_ENTRY_INFORMATION* flei = (FILE_LINK_ENTRY_INFORMATION*)p_filelink_information;
+        printf("[%d] ParentFileId is: 0x%016llx\t FileName is: %ls\r\n", i, flei->ParentFileId, flei->FileName);
 
-std::string GetFileContent(const char* p_filename)
-{
-	FILE* fp = NULL;
-	fopen_s(&fp, p_filename, "rb");
-	if (fp != NULL)
-	{
-		fseek(fp, 0, SEEK_END);
-		long length = ftell(fp);
-		char* buff = (char*)malloc(length + 1);
-		if (buff != NULL) {
-			memset(buff, sizeof(buff), 0);
-			rewind(fp);
-			size_t read_len = fread(buff, 1, length, fp);
-			buff[read_len] = '\0';
-			fclose(fp);
-			std::string file_data(buff, read_len);
-			free(buff);
-			return file_data;
-		}
-	}
-	return std::string();
-}
-
-void SaveFile(const char* p_filename, const char* p_buff, DWORD dw_len) {
-	FILE* fp = NULL;
-	fopen_s(&fp, p_filename, "wb+");
-	if (fp != NULL)
-	{
-		fwrite(p_buff, 1, dw_len, fp);
-		fclose(fp);
-	}
-}
-
-bool GetPECodeSegInfo(const char* pFilePath, const char* p_filename)
-{
-	std::string strContent = GetFileContent(pFilePath);
-	if (0 == strContent.length()) {
-		return false;
-	}
-
-	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)strContent.c_str();
-	if (pDosHeader && pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
-		return false;
-	}
-
-	PIMAGE_NT_HEADERS pNtHeaders = (PIMAGE_NT_HEADERS)((BYTE*)pDosHeader + pDosHeader->e_lfanew);
-	if (pNtHeaders && pNtHeaders->Signature != IMAGE_NT_SIGNATURE){
-		return false;
-	}
-
-	PIMAGE_SECTION_HEADER pSecHeader = IMAGE_FIRST_SECTION(pNtHeaders);
-	const int nSectionCnts = pNtHeaders->FileHeader.NumberOfSections;
-	for (int i = 0; i < nSectionCnts; i++)
-	{
-		if (0 == strcmp((char*)pSecHeader->Name, ".text"))
-		{
-			const char* pCodeEntry = (const char*)((BYTE*)pDosHeader + pSecHeader->PointerToRawData);
-			SaveFile(p_filename, pCodeEntry, pSecHeader->Misc.VirtualSize);
-			return true;
-		}
-		pSecHeader++;
-	}
-
-	return false;
-}
-
-
-int main(int argc, char* argv[]) {
-	
-	GetPECodeSegInfo(argv[1], argv[2]);
-	return 0;
-}
+        memcpy_s(offset_buff, sizeof(offset_buff), (char*)p_buff + 8 + offset + index, sizeof(offset_buff));
+        index += offset;
+        offset = (int)*offset_buff;
+        if (offset == 0) {
+            offset = BytesNeeded - index - 8;
+        }
+    }
