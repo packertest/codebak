@@ -3,3 +3,4 @@ https://zhuanlan.zhihu.com/p/98124110
 https://zhuanlan.zhihu.com/p/162866700
 OpenSearcher
 awesome-python-resources
+https://plugins.jetbrains.com/
