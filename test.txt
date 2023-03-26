@@ -1,28 +1,5 @@
-    // get hardlink num
-    FILE_LINKS_INFORMATION* fli = (FILE_LINKS_INFORMATION*)p_buff;
-    ULONG BytesNeeded = fli->BytesNeeded;
-    ULONG EntriesReturned = fli->EntriesReturned;
-    ULONG offset = fli->Entry.NextEntryOffset;
-    
-    BYTE offset_buff[8] = { 0 };
-    ULONG index = 0;
-    for (size_t i = 0; i < EntriesReturned; i++)
-    {
-        LPVOID p_filelink_information = malloc(offset);
-        if (p_filelink_information == NULL) {
-            fnNtClose(filehandle);
-            return -1;
-        }
-        memset(p_filelink_information, 0, offset);
-        memcpy_s(p_filelink_information, offset, (char*)p_buff + 8 + index, offset);
-
-        FILE_LINK_ENTRY_INFORMATION* flei = (FILE_LINK_ENTRY_INFORMATION*)p_filelink_information;
-        printf("[%d] ParentFileId is: 0x%016llx\t FileName is: %ls\r\n", i, flei->ParentFileId, flei->FileName);
-
-        memcpy_s(offset_buff, sizeof(offset_buff), (char*)p_buff + 8 + offset + index, sizeof(offset_buff));
-        index += offset;
-        offset = (int)*offset_buff;
-        if (offset == 0) {
-            offset = BytesNeeded - index - 8;
-        }
-    }
+https://zhuanlan.zhihu.com/p/351494670
+https://zhuanlan.zhihu.com/p/98124110
+https://zhuanlan.zhihu.com/p/162866700
+OpenSearcher
+awesome-python-resources
