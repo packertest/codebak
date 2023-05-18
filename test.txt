@@ -1,0 +1,15 @@
+# http://www.cnblogs.com/baokang/p/4979243.html 
+# https://blog.csdn.net/weixin_37569048/article/details/90692811
+
+public class Main {
+    static {
+        System.loadLibrary("test");
+    }
+    public native static int add(int num1, int num2);
+
+    public static void main(String[] args) {
+        String str = System.getProperty("java.library.path");
+        System.out.println(str);
+        System.out.println("[+] 100 + 100 = " + add(100, 100));
+    }
+}
