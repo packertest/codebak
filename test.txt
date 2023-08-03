@@ -1,1 +1,27 @@
-hello world
+import os
+
+# 存储已存在和不存在的数据的文件名
+existing_file = "existing.txt"
+non_existing_file = "non_existing.txt"
+
+# 用于存储已存在和不存在的数据的集合
+existing_data = set()
+non_existing_data = set()
+
+with open("path.txt", "r") as file:
+    for line in file:
+        path = line.strip()  # 去除行末尾的换行符和空格
+
+        if os.path.exists(path):
+            existing_data.add(path)
+        else:
+            non_existing_data.add(path)
+
+# 将已存在和不存在的数据分别写入文件，并去除重复数据
+with open(existing_file, "w") as file:
+    for path in existing_data:
+        file.write(path + "\n")
+
+with open(non_existing_file, "w") as file:
+    for path in non_existing_data:
+        file.write(path + "\n")
