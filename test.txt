@@ -3,3 +3,6 @@ https://zhuanlan.zhihu.com/p/402177729
 https://www.jianshu.com/p/b7e392b1b90c
 https://blog.csdn.net/K_Lily/article/details/105653456
 https://zhuanlan.zhihu.com/p/100927745
+
+
+yum install -y ncurses-devel make gcc bc bison flexelfutils-libelf-devel openssl-devel rpm-build
