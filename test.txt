@@ -6,3 +6,12 @@ https://zhuanlan.zhihu.com/p/100927745
 
 
 yum install -y ncurses-devel make gcc bc bison flexelfutils-libelf-devel openssl-devel rpm-build
+
+//
+https://www.jianshu.com/p/9a100c3d6264
+
+// anaconda
+https://www.jianshu.com/p/b1051c8b980f
+https://blog.csdn.net/weixin_44456692/article/details/113002314
+https://repo.anaconda.com/archive/
+https://www.softwarecollections.org/en/scls/rhscl/devtoolset-7/
