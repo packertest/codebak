@@ -1,68 +1,34 @@
-https://cdn.kernel.org/pub/linux/kernel/v4.x/
-https://zhuanlan.zhihu.com/p/402177729
-https://www.jianshu.com/p/b7e392b1b90c
-https://blog.csdn.net/K_Lily/article/details/105653456
-https://zhuanlan.zhihu.com/p/100927745
+filename = "test.txt"
 
+def get_directory_paths(search_text):
+    with open(filename, "r") as file:
+        content = file.read()
 
-yum install -y ncurses-devel make gcc bc bison flexelfutils-libelf-devel openssl-devel rpm-build
+    directory_paths = []
+    index = 0
 
-//
-https://www.jianshu.com/p/9a100c3d6264
+    while index < len(content):
+        search_index = content.find(search_text, index)
+        if search_index != -1:
+            closest_match = content.rfind("Directory of", 0, search_index)
+            if closest_match != -1:
+                newline_index = content.find("\n", closest_match)
+                if newline_index != -1:
+                    directory_path = content[closest_match:newline_index].strip()
+                    directory_paths.append(directory_path.split("Directory of ")[1])
+            index = search_index + len(search_text)
+        else:
+            break
 
-// anaconda
-https://www.jianshu.com/p/b1051c8b980f
-https://blog.csdn.net/weixin_44456692/article/details/113002314
-https://repo.anaconda.com/archive/
-https://www.softwarecollections.org/en/scls/rhscl/devtoolset-7/
+    return directory_paths
 
-[root@localhost Desktop]# python3.6 --version
-Python 3.6.8
-[root@localhost Desktop]# uname -a
-Linux localhost.localdomain 4.18.0-147.el8.x86_64 #1 SMP Thu Sep 26 15:52:44 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
-[root@localhost Desktop]# gcc --version
-gcc (GCC) 8.3.1 20190507 (Red Hat 8.3.1-4)
-Copyright (C) 2018 Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+desktop_paths = get_directory_paths("hello")
+print("Directory paths for 'hello':")
+for path in desktop_paths:
+    print(path)
 
-[root@localhost Desktop]# openssl version -a
-OpenSSL 1.1.1c FIPS  28 May 2019
-built on: Mon Jun 24 13:15:33 2019 UTC
-platform: linux-x86_64
-options:  bn(64,64) md2(char) rc4(16x,int) des(int) idea(int) blowfish(ptr) 
-compiler: gcc -fPIC -pthread -m64 -Wa,--noexecstack -Wall -O3 -O2 -g -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong -grecord-gcc-switches -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1 -m64 -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -Wa,--noexecstack -Wa,--generate-missing-build-notes=yes -specs=/usr/lib/rpm/redhat/redhat-hardened-ld -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM -DZLIB -DNDEBUG -DPURIFY -DDEVRANDOM="\"/dev/urandom\"" -DSYSTEM_CIPHERS_FILE="/etc/crypto-policies/back-ends/openssl.config"
-OPENSSLDIR: "/etc/pki/tls"
-ENGINESDIR: "/usr/lib64/engines-1.1"
-Seeding source: os-specific
-engines:  rdrand dynamic 
-[root@localhost Desktop]# strings /lib64/libc.so.6 |grep GLIBC_
-GLIBC_2.2.5
-GLIBC_2.2.6
-GLIBC_2.3
-GLIBC_2.3.2
-GLIBC_2.3.3
-GLIBC_2.3.4
-GLIBC_2.4
-GLIBC_2.5
-GLIBC_2.6
-GLIBC_2.7
-GLIBC_2.8
-GLIBC_2.9
-GLIBC_2.10
-GLIBC_2.11
-GLIBC_2.12
-GLIBC_2.13
-GLIBC_2.14
-GLIBC_2.15
-GLIBC_2.16
-GLIBC_2.17
-GLIBC_2.18
-GLIBC_2.22
-GLIBC_2.23
-GLIBC_2.24
-GLIBC_2.25
-GLIBC_2.26
-GLIBC_2.27
-GLIBC_2.28
-GLIBC_PRIVATE
+known_game_list_paths = get_directory_paths("KnownGameList.bin")
+print("Directory paths for 'KnownGameList.bin':")
+for path in known_game_list_paths:
+    print(path)
+
