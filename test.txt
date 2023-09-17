@@ -1,1 +1,145 @@
-test
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.cert.X509Certificate;
+import java.security.cert.CertificateException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.HttpsURLConnection;
+import java.util.Random;
+
+public class HttpClient {
+    static {
+        disableSslVerification();
+    }
+
+    public static String sendGETRequest(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        
+        connection.setRequestMethod("GET");
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+
+            in.close();
+            connection.disconnect();
+
+            return content.toString();
+        } else {
+            connection.disconnect();
+            throw new IOException("HTTP GET request failed with response code: " + responseCode);
+        }
+    }
+
+    public static String sendPOSTRequest(String urlString, String data) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+
+        // Write POST data
+        try (DataOutputStream out = new DataOutputStream(connection.getOutputStream())) {
+            out.writeBytes(data);
+            out.flush();
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_CREATED) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+
+            in.close();
+            connection.disconnect();
+
+            return content.toString();
+        } else {
+            connection.disconnect();
+            throw new IOException("HTTP POST request failed with response code: " + responseCode);
+        }
+    }
+
+    // Disable SSL certificate verification in favor of self-signed certificates
+    private static void disableSslVerification() {
+        try {
+            TrustManager[] trustAllCertificates = new TrustManager[]{
+                    new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                        }
+
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                        }
+                    }
+            };
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCertificates, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int generateRandom4Byte() {
+        Random random = new Random();
+        byte[] bytes = new byte[4];
+        random.nextBytes(bytes);
+
+        // Convert byte array to 32-bit integer
+        int randomInt = 0;
+        for (int i = 0; i < 4; i++) {
+            randomInt = (randomInt << 8) | (bytes[i] & 0xFF);
+        }
+
+        return randomInt;
+    }
+
+    public static void test() {
+        int randomNumber = generateRandom4Byte();
+        int result = randomNumber & 0xFFFFFFFF;
+        System.out.println("The randomly generated 4-byte number is: " + Integer.toHexString(randomNumber));
+        System.out.println("The result of ANDing with 0xFFFFFFFF is: " + Integer.toHexString(result));
+    }
+
+    public static void main(String[] args) {
+        try {
+            test();
+//            String getUrl = "https://jsonplaceholder.typicode.com/posts/1";
+            String getUrl = "http://127.0.0.1:8090/hello.txt";
+            String getResponse = sendGETRequest(getUrl);
+            System.out.println("GET Response:\n" + getResponse);
+
+
+//            String postUrl = "https://jsonplaceholder.typicode.com/posts";
+//            String postData = "title=foo&body=bar&userId=1";
+//            String postResponse = sendPOSTRequest(postUrl, postData);
+//            System.out.println("POST Response:\n" + postResponse);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+/////////////////////////////////////////////////////
+https://chatgpt-free.ai/
