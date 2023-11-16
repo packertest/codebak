@@ -1,1 +1,80 @@
 hello
+import java.io.File;
+
+// 功能的基类
+abstract class Functionality {
+    private String folderName;
+
+    public Functionality(String folderName) {
+        this.folderName = folderName;
+    }
+
+    abstract void displayFileNames();
+
+    protected String getFolderPath(String architecture) {
+        return folderName + "_" + architecture;
+    }
+}
+
+// 具体功能1
+class Functionality1 extends Functionality {
+    public Functionality1(String folderName) {
+        super(folderName);
+    }
+
+    @Override
+    void displayFileNames() {
+        System.out.println("Displaying file names for " + getFolderPath("x86") + ":");
+        displayFiles(getFolderPath("x86"));
+        System.out.println("Displaying file names for " + getFolderPath("x64") + ":");
+        displayFiles(getFolderPath("x64"));
+    }
+
+    private void displayFiles(String folderPath) {
+        File folder = new File(folderPath);
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                System.out.println(file.getName());
+            }
+        }
+    }
+}
+
+// 具体功能2
+class Functionality2 extends Functionality {
+    public Functionality2(String folderName) {
+        super(folderName);
+    }
+
+    @Override
+    void displayFileNames() {
+        System.out.println("Displaying file names for " + getFolderPath("x86") + ":");
+        displayFiles(getFolderPath("x86"));
+        System.out.println("Displaying file names for " + getFolderPath("x64") + ":");
+        displayFiles(getFolderPath("x64"));
+    }
+
+    private void displayFiles(String folderPath) {
+        File folder = new File(folderPath);
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                System.out.println(file.getName());
+            }
+        }
+    }
+}
+
+// Main 类
+public class Main {
+    public static void main(String[] args) {
+        // 通过多态创建具体功能对象
+        Functionality functionality1 = new Functionality1("test1");
+        Functionality functionality2 = new Functionality2("otherFunction");
+
+        // 输入功能文件夹的名称来分别输出其文件夹的文件名
+        functionality1.displayFileNames();
+        functionality2.displayFileNames();
+    }
+}
