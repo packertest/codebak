@@ -1,1 +1,32 @@
-hello
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Main {
+    public static void main(String[] args) {
+        // input string
+        String input = "hello \"dads dasds\" 1212 dsds \"one two three.\" four";
+
+        // Get the number of parameters
+        int parameterCount = countParameters(input);
+
+        // Print the number of parameters
+        System.out.println("The number of parameters entered is: " + parameterCount);
+    }
+
+    // Return the number of parameters
+    private static int countParameters(String input) {
+        // Use regular expression to match entire parameter
+        Pattern pattern = Pattern.compile("\"([^\"]*)\"|\\S+");
+        Matcher matcher = pattern.matcher(input);
+
+        // Number of statistical parameters
+        int parameterCount = 0;
+        while (matcher.find()) {
+            String parameter = matcher.group();
+            System.out.println("parameter: " + parameter);
+            parameterCount++;
+        }
+
+        return parameterCount;
+    }
+}
