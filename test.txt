@@ -1,7 +1,0 @@
-import os
-
-folder_path = 'xxx'
-
-for root, dirs, files in os.walk(folder_path):
-    if len(files) == 0:
-        print(os.path.basename(root))
