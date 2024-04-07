@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <string>
+#include <Windows.h>
+
+typedef struct {
+	unsigned char* data;
+	size_t size;
+} PEFile;
+
+PEFile read_pe_file(const char* filename);
+std::string OutputXorChar(unsigned char* buff, size_t size);
+void replaceString(BYTE* buffer, const char* replacement, size_t startPos);
+
+
+int main(int argc, char* argv[]) {
+    if (argc != 4) {
+        fprintf(stderr, "Usage: %s <PE_file1> <PE_file2> <CPP_output_file>\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    PEFile pe_fileOne = read_pe_file(argv[1]);
+	PEFile pe_fileTwo = read_pe_file(argv[2]);
+	PEFile pe_fileThree = read_pe_file(argv[3]);
+
+	std::string fileOne = OutputXorChar(pe_fileOne.data, pe_fileOne.size);
+	std::string fileTwo = OutputXorChar(pe_fileTwo.data, pe_fileTwo.size);
+
+	//replaceString(pe_fileThree.data, fileOne.c_str(), fileOne.length());
+	return 0;
+}
+
+
+PEFile read_pe_file(const char* filename) {
+	PEFile pe_file;
+	FILE* fp = NULL;
+	fopen_s(&fp, filename, "rb");
+	if (fp == NULL) {
+		fprintf(stderr, "Error opening file: %s\n", filename);
+		exit(EXIT_FAILURE);
+	}
+	fseek(fp, 0, SEEK_END);
+	pe_file.size = ftell(fp);
+	rewind(fp);
+	pe_file.data = (unsigned char*)malloc(pe_file.size);
+	if (pe_file.data == NULL) {
+		fprintf(stderr, "Memory allocation error\n");
+		exit(EXIT_FAILURE);
+	}
+	fread(pe_file.data, 1, pe_file.size, fp);
+	fclose(fp);
+	return pe_file;
+}
+
+std::string OutputXorChar(unsigned char* buff, size_t size)
+{
+	std::string str_tmp;
+	str_tmp += " = {";
+	char tmpBuff[36] = { 0 };
+	for (size_t i = 0; i < size; i++)
+	{
+		sprintf_s(tmpBuff, "0x%02X", buff[i]);
+		if ((i % 8) == 0) {
+			str_tmp += "\r\n\t";
+		}
+		str_tmp += tmpBuff;
+		str_tmp += " ^ ";
+		str_tmp += "0x1F";
+		str_tmp += ", ";
+	}
+	str_tmp += "'\\0'";
+	str_tmp += "\r\n};";
+
+	return str_tmp;
+}
+
+
+void char_array_to_hex_string(const unsigned char* data, size_t size) {
+	char buff[36];
+	for (size_t i = 0; i < size; ++i) {
+		sprintf(buff, "0x%02X", data[i]);
+		printf("%s\n", buff);
+	}
+}
